@@ -250,6 +250,29 @@ def clear_rows(grid, locked):
 
     return inc
 
+# Handle left, right, and down inputs. These need to repeat.
+def drop():
+    keys = pygame.key.get_pressed()
+
+    return True if keys[pygame.K_DOWN] else False
+
+# Calculate next shape position
+def move_piece(current_piece, direction, grid):
+
+    cur_x = current_piece.x
+    cur_y = current_piece.y
+    cur_rotation = current_piece.rotation
+
+    if direction == 'left': current_piece.x -= 1
+    if direction == 'right': current_piece.x += 1
+    if direction == 'down': current_piece.y += 1
+    if direction == 'rotate': current_piece.rotation += 1
+
+    if not(valid_space(current_piece, grid)):
+        current_piece.x = cur_x
+        current_piece.y = cur_y
+        current_piece.rotation = cur_rotation
+
 def draw_next_shape(shape, surface):
     font = pygame.font.SysFont('Sans', 30)
     label = font.render('Next Shape', 1, (255,255,255))
@@ -343,11 +366,35 @@ def main(win):
     level_time = 0
     score = 0
 
+    pygame.key.set_repeat(400, 100)
+
     while run:
+        direction = None
+
+        if drop(): direction = 'down'
+
+        # Handle events
+        for event in pygame.event.get():
+
+            if event.type == pygame.KEYDOWN:
+                # Rotate key should only be able to fire one at a time
+                # That is why we are using KEYDOWN event instead of key.get_pressed
+
+                if event.key == pygame.K_UP: direction = 'rotate'
+                if event.key == pygame.K_LEFT: direction = 'left'
+                if event.key == pygame.K_RIGHT: direction = 'right'
+
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.display.quit()
+
         grid = create_grid(locked_pos)
+
         fall_time += clock.get_rawtime()
         level_time += clock.get_rawtime()
-        clock.tick()
+        clock.tick(30)
+
+        move_piece(current_piece, direction, grid)
 
         if level_time/1000 > 5:
             level_time = 0
@@ -360,30 +407,6 @@ def main(win):
             if not(valid_space(current_piece, grid)) and current_piece.y > 0:
                 current_piece.y -= 1
                 change_piece = True
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.display.quit()
-
-            if event.type == pygame.KEYDOWN:
-                cur_x = current_piece.x
-                cur_y = current_piece.y
-                cur_rotation = current_piece.rotation
-
-                if event.key == pygame.K_LEFT:
-                    current_piece.x -= 1
-                if event.key == pygame.K_RIGHT:
-                    current_piece.x += 1
-                if event.key == pygame.K_DOWN:
-                    current_piece.y += 1
-                if event.key == pygame.K_UP:
-                    current_piece.rotation += 1
-
-                if not(valid_space(current_piece, grid)):
-                    current_piece.x = cur_x
-                    current_piece.y = cur_y
-                    current_piece.rotation = cur_rotation
 
         shape_pos = convert_shape_format(current_piece)
 
