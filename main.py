@@ -194,7 +194,7 @@ def check_lost(positions):
     return False
 
 def get_shape():
-    return Piece(5, 0, random.choice(shapes))
+    return Piece(5, 3, random.choice(shapes))
 
 def draw_text_middle(surface, text, size, color):
     font = pygame.font.SysFont('Sans', size, bold=True)
