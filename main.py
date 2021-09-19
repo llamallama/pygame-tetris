@@ -17,7 +17,7 @@ shapes: S, Z, I, O, J, L, T
 represented in order by 0 - 6
 """
 
-pygame.font.init()
+pygame.init()
 
 # GLOBALS VARS
 s_width = 800
@@ -29,6 +29,7 @@ block_size = 30
 top_left_x = (s_width - play_width) // 2
 top_left_y = s_height - play_height
 
+sounds = ['juicy.ogg', 'boom1.ogg', 'boom2.ogg', 'boom3.ogg']
 
 # SHAPE FORMATS
 
@@ -248,6 +249,10 @@ def clear_rows(grid, locked):
                 newKey = (x, y + inc)
                 locked[newKey] = locked.pop(key)
 
+    if inc >= 4:
+        sound = f'sounds/{random.choice(sounds)}'
+        play_sound(sound)
+
     return inc
 
 # Handle left, right, and down inputs. These need to repeat.
@@ -314,7 +319,6 @@ def update_score(nscore):
 def draw_window(surface, grid, score=0):
     surface.fill((0,0,0))
 
-    pygame.font.init()
     font = pygame.font.SysFont('Sans', 60)
     label = font.render('Tetris', 1, (255,255,255))
 
@@ -362,7 +366,7 @@ def main(win):
     next_piece = get_shape()
     clock = pygame.time.Clock()
     fall_time = 0
-    fall_speed = 0.27
+    fall_speed = 0.9
     level_time = 0
     score = 0
 
@@ -434,6 +438,10 @@ def main(win):
             pygame.time.delay(1500)
             run = False
             update_score(score)
+
+def play_sound(path):
+    sound = pygame.mixer.Sound(path)
+    sound.play()
 
 def main_menu(win):
     run = True
